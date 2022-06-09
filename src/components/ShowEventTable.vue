@@ -3,7 +3,6 @@
     <search-event ref="searchRef"></search-event>
     <events-table :kind="kind" :keyword="keyword" :daterange="daterange">
     </events-table>
-    <button @click="getRef">click</button>
   </div>
 </template>
 

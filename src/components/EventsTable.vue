@@ -30,17 +30,18 @@
         </tr>
       </tbody>
     </table>
-    <el-change-event v-if="show" :id="curid" @closeDialog="closeDialog"></el-change-event>
+    <change-event v-if="show" :id="curid" @closeDialog="closeDialog"></change-event>
   </div>
 </template>
 
 <script setup>
   import { computed, watch, ref } from "vue";
   import { useStore } from "vuex";
-  import { getKindofEvent } from "@/common/utils";
+  import { getKindofEvent, getTime } from "@/common/utils";
   import { ElEmpty } from "element-plus";
   import DeleteButton from "./DeleteButton";
   import EditButton from "./EditButton";
+  import ChangeEvent from "./ChangeEvent";
 
   const props = defineProps({
     keyword: {
@@ -72,24 +73,15 @@
     return hightlight;
   }
 
-  function getTime(timestamp) {
-    const time = new Date(timestamp);
-    const year = time.getFullYear();
-    const month = time.getMonth() + 1;
-    const day = time.getDate();
-    const hour = time.getHours();
-    return year + "-" + month + "-" + day + "  " + hour + "时";
-  }
-
   // 编辑功能
   let show = ref(false);
-  let curid = ref(0);
+  let curid = ref(-1);
   function openDiaglog(id) {
     curid.value = id;
     show.value = true;
   }
   function closeDialog() {
-    curid.value = 0;
+    curid.value = -1;
     show.value = false;
   }
 
@@ -133,7 +125,7 @@
       }
 
       .ddldate {
-        flex-basis: 120px;
+        flex-basis: 130px;
         flex-shrink: 0;
         flex-grow: 1;
       }
@@ -143,7 +135,7 @@
         flex-shrink: 0;
         flex-grow: 1;
         display: flex;
-        justify-content: space-between;
+        justify-content: space-around;
       }
     }
 

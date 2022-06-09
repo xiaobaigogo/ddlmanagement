@@ -1,11 +1,11 @@
 <template>
-  <div>
+  <div class="box">
     <header>
       <span v-for="(label,index) in labels" :key="index" @click="showGraph(index)"
         :class="{current: active(index)}">{{label}}</span>
     </header>
     <section>
-      <div id="main" style="height:300px; width:400px"></div>
+      <div id="graph" style="display:flex;height:400px; width:100%"></div>
     </section>
   </div>
 </template>
@@ -17,7 +17,7 @@
   const labels = ['最近一天', '最近一周', '最近一月'];
   let curindex = ref(0);
 
-  // 生成初始x轴数据：时间戳
+  // 生成初始x轴数据：时间戳【当前时间-
   function showXTimestamp(index = 0) {
     const next = (index) => {
       switch (index) {
@@ -34,8 +34,8 @@
     }
 
     const tmpStart = new Date();
-    const [syear, smonth, sdate] = [tmpStart.getFullYear(), tmpStart.getMonth(), tmpStart.getDate()];
-    const start = +new Date(syear, smonth, sdate, 0)
+    const [syear, smonth, sdate, shour] = [tmpStart.getFullYear(), tmpStart.getMonth(), tmpStart.getDate(), tmpStart.getHours()];
+    const start = +new Date(syear, smonth, sdate, shour + 1);
 
     const tmpEnd = new Date(tmpStart.getTime() + 3600 * 1000 * 24 * next(index));
     const [eyear, emonth, edate] = [tmpEnd.getFullYear(), tmpEnd.getMonth(), tmpEnd.getDate()];
@@ -45,7 +45,7 @@
     return [start, end];
   }
   let curTimeRange = computed(() => { return showXTimestamp(curindex.value) });
-  // 判断时间间隔是否小于两天
+  // 判断时间间隔是否大于两天
   const flag = computed(() => curTimeRange.value[1] - curTimeRange.value[0] >= 3600 * 1000 * 48);
 
   // 生成初始数据：事件
@@ -95,7 +95,7 @@
     function checkSameDate(item1, item2, day) {
       if (item1.getFullYear() == item2.getFullYear() && item1.getMonth() == item2.getMonth() && item1.getDate() == item2.getDate()) {
         if (!day) {
-          console.log('hour');
+          // console.log('hour');
           return item1.getHours() == item2.getHours();
         }
         return true;
@@ -118,43 +118,119 @@
 
   //let xdata = reactive()
   let option = reactive({
-    title: { text: '总用户量' },
+    title: { text: 'DDL汇总' },
     xAxis: {
+      type: 'category',
       data: xdata,
     },
     yAxis: {
-
+      type: 'value',
+      name: '个数',
+      max: function (value) {
+        return value.max + 1;
+      },
+      minInterval: 1,
+    },
+    tooltip: {
+      trigger: 'axis'
+    },
+    legend: {
+      data: ['待完成', '已完成', '已过期', '已取消'],
+      selected: { '已完成': false, '已过期': false, '已取消': false },
+      top: 20,
     },
     series: [
       {
-        name: '用户量',
+        name: '待完成',
         type: 'line',
-        data: [5, 20, 10, 40]
+        data: computed(() => ydata.value[0]),
+        areaStyle: {},
+        smooth: true,
+        smoothMonotone: 'x',
+        showSymbol: false,
+      },
+      {
+        name: '已完成',
+        type: 'line',
+        data: computed(() => ydata.value[1]),
+        areaStyle: {},
+        smooth: true,
+        smoothMonotone: 'x',
+        showSymbol: false,
+      },
+      {
+        name: '已过期',
+        type: 'line',
+        data: computed(() => ydata.value[2]),
+        areaStyle: {},
+        smooth: true,
+        smoothMonotone: 'x',
+        showSymbol: false,
+      },
+      {
+        name: '已取消',
+        type: 'line',
+        data: computed(() => ydata.value[3]),
+        areaStyle: {},
+        smooth: true,
+        smoothMonotone: 'x',
+        showSymbol: false,
       }
     ],
-    smooth: true,
+
   });
 
   let mychart;
   onMounted(() => {
-    mychart = echarts.init(document.querySelector('#main'));
+    mychart = echarts.init(document.querySelector('#graph'));
     mychart.setOption(option);
   })
 
   function showGraph(index) {
     curindex.value = index;
-    // option.xAxis.data = createXAxis();
     mychart.setOption(option); // 重新加载图表
-    // xdata = 
   }
 
   function active(index) {
     return index == curindex.value;
   }
+
+  window.addEventListener('resize', function () {
+    mychart.resize()
+  })
 </script>
 
 <style scoped lang="scss">
-  .current {
-    color: blue;
+  .box {
+    border: 1px solid #eee;
+    border-radius: 5px;
+    box-shadow: 1px 1px 10px #eee;
+
+    header {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+      margin-bottom: 10px;
+
+      span {
+        padding: 3px 10px;
+        border-right: 2px solid #eee;
+        /* border-radius: 5px; */
+        /* background-color: #fff; */
+        cursor: pointer;
+
+        &.current {
+          font-weight: 700;
+        }
+
+        &:last-of-type {
+          border: none;
+        }
+      }
+    }
+
+    section {
+      width: 100%;
+    }
   }
 </style>

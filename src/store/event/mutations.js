@@ -12,15 +12,17 @@ export default {
 
   [type.EDITEVENT](state, payload) {
     for (let i = 0; i < state.event.length; i++) {
-      const item = state.event[i];
+      let item = state.event[i];
       if (payload.id == item.id) {
         console.log(payload);
-        item.title = payload.title;
-        item.content = payload.content;
-        item.ddldate = payload.ddldate;
-        item.hour = payload.hour;
-        item.timestamp = payload.timestamp;
-        item.kind = payload.kind;
+        item = payload;
+        // item = Object.assign({}, payload);
+        // item.title = payload.title;
+        // item.content = payload.content;
+        // item.ddldate = payload.ddldate;
+        // item.hour = payload.hour;
+        // item.timestamp = payload.timestamp;
+        // item.kind = payload.kind;
         break;
       }
     }

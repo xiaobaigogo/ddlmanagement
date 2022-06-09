@@ -3,12 +3,18 @@ import * as type from './mutations_type';
 export default {
   addevent({ commit }, payload) {
     console.log('addevent');
-    console.log([type.ADDEVENT])
-    commit(type.ADDEVENT, payload);
+    return new Promise((resolve, reject) => {
+      commit(type.ADDEVENT, payload);
+      resolve();
+    })
   },
 
   editevent({ commit }, payload) {
-    commit(type.EDITEVENT, payload);
+    return new Promise((resolve, reject) => {
+      commit(type.EDITEVENT, payload);
+      resolve();
+    })
+    // commit(type.EDITEVENT, payload);
   },
 
   clearevent({ commit }) {

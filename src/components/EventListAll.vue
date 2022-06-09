@@ -42,6 +42,7 @@
         box-shadow: 1px 1px 3px rgb(1 1 1 / 17%);
         z-index: 1;
         transition: all 0.3s;
+        /* min-width: 96.588px; */
 
         &:hover {
           box-shadow: 1px 1px 20px rgb(1 1 1 / 17%);

@@ -17,85 +17,12 @@ export function getKindofEvent(item) {
       break;
   }
 }
-
-
-// 字符串转时间戳
-export function strToTime(ddldate, hour) {
-  const timestamp = +new Date(ddldate);
-  // + hour * 1000 * 3600
-  console.log(timestamp)
-  return timestamp;
-}
-
-// 时间戳转字符串
-export function timeToStr(time) {
-  const date = new Date(time);
-  const tmpMonth = date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1;
-  const tmpDate = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
-  const [year, month, day, hour] = [date.getFullYear(), tmpMonth, tmpDate, date.getHours()]
-  return { days: year + "-" + month + "-" + day, hours: hour };
-}
-
-// 校验时间
-export function checkTime(time) {
-  const now = +new Date();
-  return now < time;
-}
-
-// 校验事件
-export function checkEvent(res) {
-  for (let [key, val] of Object.entries(res)) {
-    // console.log(key, val);
-    switch (key) {
-      case 'title':
-        if (val == "" || val.trim() == "") {
-          Toast('标题不能为空');
-          return false;
-        }
-        break;
-      case 'days':
-        if (val == "" || val.trim() == "") {
-          Toast('日期不能为空');
-          return false;
-        }
-        break;
-      default:
-        break;
-    }
-  }
-
-  // console.log(res.days, res.hours, strToTime(res.days, res.hours))
-  if (!checkTime(strToTime(res.days, res.hours))) {
-    Toast('设定的DDL时间不应当小于当前时间');
-    return false;
-  } else {
-    return true;
-  }
-}
-
-export function Toast(str) {
-  console.log(str);
-}
-
-// local对象和show对象互换
-export function exchange(obj) {
-  const newObj = {};
-  if (obj.hasOwnProperty('ddl')) { // 如果有ddl属性，说明是一个local对象，
-    const { days, hours } = timeToStr(obj.ddl);
-    console.log(days, hours);
-    const { title, content, id } = obj;
-    newObj['id'] = id;
-    newObj['title'] = title;
-    newObj['content'] = content;
-    newObj['days'] = days;
-    newObj['hours'] = hours;
-  } else { // 如果没有ddl属性，说明是一个show对象
-    console.log(obj);
-    const ddl = strToTime(obj['days'], obj['hours']);
-    newObj['ddl'] = ddl;
-    newObj['title'] = obj.title;
-    newObj['content'] = obj.content;
-  }
-
-  return newObj;
+// 将时间戳转为'yyyy-mm-dd h'格式
+export function getTime(timestamp) {
+  const time = new Date(timestamp);
+  const year = time.getFullYear();
+  const month = time.getMonth() + 1;
+  const day = time.getDate();
+  const hour = time.getHours();
+  return year + "-" + (month < 10 ? '0' + month : month) + "-" + (day < 10 ? '0' + day : day) + "  " + (hour < 10 ? '0' + hour : hour) + "时";
 }

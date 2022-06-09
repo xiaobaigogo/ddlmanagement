@@ -19,7 +19,7 @@
               <span class="title" :class="{'textline': item.kind == 4}">{{item.title}}</span>
               <p :class="{'textline': item.kind == 4}">{{item.content}}</p>
             </div>
-            <div>
+            <div style="display:flex">
               <undo class="resume" theme="outline" size="25" fill="#868383" :strokeWidth="2" strokeLinejoin="miter"
                 @click="moveToDo(item)" v-if="item.kind == 4" />
               <delete class="delete" theme="outline" size="25" fill="#868383" :strokeWidth="2" strokeLinejoin="miter"
@@ -97,8 +97,8 @@
   @mixin content($cont) {
     position: absolute;
     cursor: pointer;
-    background-color: #fff;
-    top: -10px;
+    /* background-color: #fff; */
+    top: 0px;
     width: 140%;
     height: 120%;
     content: $cont;
@@ -125,9 +125,19 @@
           /* 为了图标伪元素不会乱跑设的 */
           position: relative;
 
-          &:hover::after {
+          &::after {
             @include content($fullselect);
-            top: 0;
+            visibility: hidden;
+          }
+
+          &:hover {
+            &::after {
+              visibility: visible;
+            }
+
+            & {
+              visibility: hidden;
+            }
           }
         }
 
@@ -163,17 +173,52 @@
           position: relative;
         }
 
-        .resume:hover::after {
-          @include content($resume)
+        .resume::after {
+          @include content($resume);
+          visibility: hidden;
         }
 
-        .delete:hover::after {
-          @include content($delete)
+        .resume:hover {
+          & {
+            visibility: hidden;
+          }
+
+          &::after {
+            visibility: visible;
+          }
         }
 
-        .cancel:hover::after {
-          @include content($cancel)
+        .delete::after {
+          @include content($delete);
+          visibility: hidden;
         }
+
+        .delete:hover {
+          & {
+            visibility: hidden;
+          }
+
+          &::after {
+            visibility: visible;
+          }
+        }
+
+        .cancel::after {
+          @include content($cancel);
+          visibility: hidden;
+        }
+
+        .cancel:hover {
+          & {
+            visibility: hidden;
+          }
+
+          &::after {
+            visibility: visible;
+          }
+        }
+
+
       }
     }
 

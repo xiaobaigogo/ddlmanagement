@@ -1,237 +1,278 @@
 <template>
-  <!-- 遮罩层 -->
-  <div class="cover" v-if="show">
-    <!-- 正式层 -->
-    <form action="" class="dialog">
-      <header>设置DDL</header>
-      <close id="close" :func="closeDialog"></close>
-      <label for="title">标题</label>
-      <input type="text" id="title" v-model="title" onkeydown="if(event.keyCode == 13) return false;">
-      <div class="content">
-        <label for="content">内容</label>
-        <textarea id="content" cols="30" rows="10" v-model="content"></textarea>
-      </div>
+  <div class="masked">
+    <div class="contain">
+      <header class="header">设置一个DDL吧！</header>
+      <close-one theme="outline" size="20" fill="#868383" :strokeWidth="3" strokeLinejoin="miter" class="close-icon"
+        @click.stop="closeDialog(ruleFormRef)" />
+      <section class="section">
+        <el-form :model="ruleForm" label-width="90px" label-position="right" class="demo-ruleForm" :rules="rules"
+          ref="ruleFormRef">
+          <el-form-item label="标题" prop="title">
+            <el-input v-model="ruleForm.title" />
+          </el-form-item>
+          <el-form-item label="内容" prop="content">
+            <el-input v-model="ruleForm.content" type="textarea" />
+          </el-form-item>
+          <el-form-item label="类型" prop="kind">
+            <el-radio-group v-model="ruleForm.kind">
+              <el-radio :label="1">待完成</el-radio>
+              <el-radio :label="2">已完成</el-radio>
+              <el-radio :label="3">已过期</el-radio>
+              <el-radio :label="4">已取消</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="DDL时间" required>
+            <el-col :span="11">
+              <el-form-item prop="ddldate">
+                <el-date-picker v-model="ruleForm.ddldate" type="date" label="请选择日期" style="width: 100%"
+                  :shortcuts="shortcuts" />
+              </el-form-item>
+            </el-col>
+            <el-col class="text-center" :span="2">
+              <span class="text-gray-500">-</span>
+            </el-col>
+            <el-col :span="11">
+              <el-form-item prop="hour">
+                <el-input-number v-model="ruleForm.hour" label="hour" :min="0" :max="23" placeholder="请选择时间"
+                  style="width: 100%" />
+              </el-form-item>
+            </el-col>
+          </el-form-item>
+          <el-form-item>
+            <el-col :span="12" align="center">
+              <el-button @click.stop="resetForm(ruleFormRef)">重置</el-button>
+            </el-col>
+            <el-col :span="12" align="center">
+              <el-button type="primary" @click.stop="onSubmit(ruleFormRef)">确定</el-button>
+            </el-col>
+          </el-form-item>
 
-      <label for="day">DDL</label>
-      <input type="date" id="day" v-model="days">
-
-      时：<input list="hour" v-model="hours">
-      <datalist id="hour">
-        <option v-for="(item, index) in hour" :value="index" :key="index">{{index}}</option>
-      </datalist>
-
-      <br>
-
-      <div class="btns">
-        <input type="reset" value="清空" @click="clearobj">
-        <input type="submit" value="确定" @click="changeevent">
-      </div>
-
-    </form>
+        </el-form>
+      </section>
+    </div>
   </div>
 </template>
 
 <script>
-import { useStore } from "vuex";
-import { reactive, toRefs, defineComponent, computed, ref } from "vue";
-import Close from "./Close";
-import {
-  strToTime,
-  timeToStr,
-  checkTime,
-  checkEvent,
-  Toast,
-  exchange
-} from "@/common/utils";
+  import { useStore } from "vuex";
+  import { ref, reactive, computed, defineEmits } from "vue";
+  import { CloseOne } from "@icon-park/vue-next";
+  import {
+    ElInput,
+    ElDatePicker,
+    ElInputNumber,
+    ElForm,
+    ElFormItem,
+    ElCol,
+    ElButton,
+    ElRadioGroup,
+    ElRadio
+  } from "element-plus";
 
-export default defineComponent({
-  props: {
-    id: {
-      type: Number,
-      default: 0
-    }
-  },
-  components: {
-    Close
-  },
-  setup(props) {
-    const store = useStore();
-    // 决定是否渲染
-    const show = computed(() => {
-      return store.state.contact.showDialog;
-    });
-    // console.log(props.id);
-    // 先找有无对应id，有就是编辑，无就是添加
-    const tmp = computed(() => {
-      return store.getters.findEvent(props.id);
-    });
-
-    // console.log(tmp.value);
-    let obj = {
-      // plain-Show对象
-      title: "",
-      content: "",
-      days: timeToStr(Date.now())["days"],
-      hours: 0
-    };
-    // flag 为true表示是添加事件，false表示是编辑事件
-    let res, flag;
-    if (tmp.value === undefined) {
-      res = reactive(obj);
-      flag = true;
-    } else {
-      obj = exchange(tmp.value); // 把state对象转成Show形式的对象
-      res = reactive(obj);
-      console.log("exchange");
-      flag = false;
-    }
-    // 设定小时
-    const hour = new Array(24);
-
-    // 发出改变事件
-    function changeevent(e) {
-      console.log(e);
-      e.preventDefault();
-      console.log("提交");
-
-      // 校验事件内容
-      if (!checkEvent(res)) {
-        return;
+  export default {
+    props: {
+      id: {
+        type: Number,
+        default: -1
       }
+    },
+    emits: ['closeDialog'],
+    components: {
+      ElInput,
+      ElDatePicker,
+      ElInputNumber,
+      ElForm,
+      ElFormItem,
+      ElCol,
+      ElButton,
+      ElRadioGroup,
+      ElRadio,
+      CloseOne
+    },
+    setup(props, ctx) {
+      // 绑定整个表单ref
+      const ruleFormRef = ref();
 
-      const eve = exchange(res); // 把Show对象转成state对象
-      if (flag) {
-        // 如果是添加事件
-        store.dispatch("addevent", eve);
-      } else {
-        // 如果是编辑事件
-        console.log("edit");
-        store.dispatch("editevent", eve);
+      // 看有没有传入id，有则直接取，无则新建一个模板
+      const store = useStore();
+      const tmp = store.getters.findEvent(props.id);
+      const ruleForm = tmp
+        ? tmp
+        : reactive({
+          title: "",
+          content: "",
+          ddldate: "",
+          hour: 0,
+          timestamp: 0,
+          kind: 1
+        });
+      // flag 为true表示是添加事件，false表示是编辑事件
+      const flag = tmp ? false : true;
+
+      // 规则
+      const rules = reactive({
+        title: [
+          {
+            required: true,
+            message: "请输入标题",
+            trigger: "blur"
+          }
+        ],
+        // content: [{ required: false }],
+        ddldate: [
+          {
+            type: "date",
+            required: true,
+            message: "请选择一个日期",
+            trigger: "change"
+          }
+        ],
+        hour: [
+          {
+            validator: validateTime,
+            trigger: "blur"
+          }
+        ],
+        kind: [
+          {
+            required: true,
+            trigger: "change"
+          }
+        ]
+      });
+      // 日期的快速选择
+      const shortcuts = [
+        {
+          text: "今天",
+          value: new Date()
+        },
+        {
+          text: "明天",
+          value: () => {
+            const date = new Date();
+            date.setTime(date.getTime() + 3600 * 1000 * 24);
+            return date;
+          }
+        },
+        {
+          text: "一周后",
+          value: () => {
+            const date = new Date();
+            date.setTime(date.getTime() + 3600 * 1000 * 24 * 7);
+            return date;
+          }
+        }
+      ];
+      function validateTime(rule, value, callback) {
+        console.log(ruleForm.ddldate);
+        const time = +new Date(ruleForm.ddldate) + value * 1000 * 3600;
+        if (ruleForm.kind == 1 && Date.now() > time) {
+          // 待完成但是DDL时间已过
+          callback(new Error("选择DDL时间应大于目前时间"));
+        } else if (ruleForm.kind == 3 && Date.now() < time) {
+          // 已过期但是DDL时间未过
+          callback(new Error("你选择的是已过期，DDL时间应小于目前时间"));
+        } else {
+          ruleForm.timestamp = time;
+          callback();
+        }
       }
-    }
+      // 提交
+      const onSubmit = ruleFormRef => {
+        if (!ruleFormRef) {
+          return;
+        }
+        // e.preventDefault();
+        ruleFormRef.validate(valid => {
+          if (valid) {
+            if (flag) {
+              // 因为dispatch操作是异步，需要添加成功后再清除表单
+              store.dispatch("addevent", ruleForm).then(() => {
+                ruleFormRef.resetFields();
+                ctx.emit('closeDialog');
+              });
 
-    // 重置按钮
-    function clearobj(e) {
-      obj.title = "";
-      obj.content = "";
-      obj.days = timeToStr(Date.now())["days"];
-      obj.hours = 0;
-    }
+            } else {
+              store.dispatch("editevent", ruleForm).then(() => {
+                ctx.emit('closeDialog');
+              });
+            }
 
-    // 关闭组件
-    function closeDialog() {
-      store.commit("closeDialog");
-    }
+          } else {
+            // console.log(false);
+          }
+        });
+      };
 
-    return { hour, changeevent, closeDialog, clearobj, ...toRefs(res), show, input };
-  }
-});
+      // 重置表单
+      const resetForm = ruleFormRef => {
+        if (!ruleFormRef) {
+          return;
+        }
+        ruleFormRef.resetFields();
+      };
+
+      // 关闭对话框
+      function closeDialog(ruleFormRef) {
+        ruleFormRef.resetFields();
+        ctx.emit('closeDialog');
+      }
+      return {
+        closeDialog,
+        ruleForm,
+        shortcuts,
+        rules,
+        onSubmit,
+        ruleFormRef,
+        resetForm
+      };
+    }
+  };
 </script>
 
 <style scoped lang="scss">
-@import "@/assets/index";
-
-@mixin common() {
-  border-radius: 5px;
-  border: 1px solid rgb(121, 118, 118);
-  height: 1.5rem;
-  margin: 2rem 0;
-  vertical-align: center;
-}
-
-.cover {
-  position: fixed;
-  top: 0;
-  left: 0;
-  background-color: rgba(1, 1, 1, 0.4);
-  width: 100%;
-  height: 100vh;
-
-  .dialog {
-    @include common;
-    height: 70%;
-    width: 70%;
+  .masked {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #fff;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(1, 1, 1, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9;
 
-    // text-align: center;
-    header {
-      text-align: center;
-      margin: 2rem 0;
-      background-color: $theme1-bgc;
-      color: $theme1-color;
-    }
+    .contain {
+      background: #fff;
+      border-radius: 5px;
+      width: 65%;
+      position: relative;
 
-    #close {
-      position: absolute;
-      top: 1%;
-      right: 1%;
-    }
+      .close-icon {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        cursor: pointer;
+      }
 
-    label {
-      display: inline-block;
-      width: 20%;
-      text-align: right;
-      padding-right: 10px;
-      margin: 2rem 0;
-      // vertical-align: center;
-    }
+      .header {
+        text-align: center;
+        margin: 20px 0;
+      }
 
-    input:focus {
-      outline-color: $theme1-bgc;
-    }
+      .section {
+        width: 90%;
 
-    textarea:focus {
-      outline-color: $theme1-bgc;
-    }
-
-    .content {
-      display: flex;
-    }
-
-    input[type="text"] {
-      @include common;
-      width: 60%;
-    }
-
-    textarea {
-      @include common;
-      height: 5rem;
-      width: 60%;
-      resize: none;
-    }
-
-    input[type="date"] {
-      @include common;
-      width: 15%;
-    }
-
-    input[list="hour"] {
-      @include common;
-      width: 2rem;
-    }
-
-    input[type="reset"] {
-      @include common;
-      width: 10%;
-      min-width: 40px;
-    }
-
-    input[type="submit"] {
-      @include common;
-      width: 10%;
-      min-width: 40px;
-      background-color: $theme1-bgc;
-      color: $theme1-color;
-    }
-
-    .btns {
-      display: flex;
-      justify-content: space-evenly;
+        .btns {
+          display: flex;
+          justify-content: space-around;
+        }
+      }
     }
   }
-}
+
+  .text-center {
+    text-align: center;
+  }
 </style>
