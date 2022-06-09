@@ -172,7 +172,7 @@
         // console.log('drop');
         this.style.borderColor = '#868383';
         const fileList = e.dataTransfer.files;
-        console.log(fileList[0]);
+        // console.log(fileList[0]);
         if (!(/\.(xls|xlsx)$/).test(fileList[0].name.toLowerCase())) {
           return false;
         }
@@ -182,7 +182,7 @@
             type: "binary"
           }
           const workbook = XLSX.read(ev.target.result, options);
-          console.log(workbook);
+          // console.log(workbook);
           const wsname = workbook.SheetNames[0];
           ws.value = XLSX.utils.sheet_to_json(workbook.Sheets[wsname]);
         }

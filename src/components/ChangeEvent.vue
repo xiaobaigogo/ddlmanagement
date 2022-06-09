@@ -164,7 +164,7 @@
         }
       ];
       function validateTime(rule, value, callback) {
-        console.log(ruleForm.ddldate);
+        // console.log(ruleForm.ddldate);
         const time = +new Date(ruleForm.ddldate) + value * 1000 * 3600;
         if (ruleForm.kind == 1 && Date.now() > time) {
           // 待完成但是DDL时间已过
@@ -187,9 +187,8 @@
           if (valid) {
             if (flag) {
               // 因为dispatch操作是异步，需要添加成功后再清除表单
-              store.dispatch("addevent", ruleForm).then(() => {
-                ruleFormRef.resetFields();
-                ctx.emit('closeDialog');
+              store.dispatch("addevent", JSON.parse(JSON.stringify(ruleForm))).then(() => {
+                closeDialog(ruleFormRef);
               });
 
             } else {
@@ -217,6 +216,7 @@
         ruleFormRef.resetFields();
         ctx.emit('closeDialog');
       }
+
       return {
         closeDialog,
         ruleForm,

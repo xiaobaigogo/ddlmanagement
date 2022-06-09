@@ -2,7 +2,7 @@
   <div class="add-event-button" @click="openDialog">
     <span>添加DDL</span>
     <add-one class="icon" theme="outline" size="25" fill="#868383" :strokeWidth="2" strokeLinejoin="miter" />
-    <change-event v-if="show" @closeDialog="closeDialog"></change-event>
+    <change-event v-show="show" @closeDialog="closeDialog"></change-event>
   </div>
 </template>
 

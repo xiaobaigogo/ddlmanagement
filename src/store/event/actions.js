@@ -2,7 +2,7 @@ import * as type from './mutations_type';
 
 export default {
   addevent({ commit }, payload) {
-    console.log('addevent');
+    // console.log('addevent');
     return new Promise((resolve, reject) => {
       commit(type.ADDEVENT, payload);
       resolve();

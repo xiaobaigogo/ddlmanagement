@@ -38,7 +38,7 @@
   function exportExcelFile(dom, sheetName = 'ddl', fileName = 'ddl.xlsx') {
     const options = { raw: true, cellDates: true }
     const workBook = XLSX.utils.table_to_book(dom, options);
-    console.log(workBook);
+    // console.log(workBook);
     return XLSX.writeFile(workBook, fileName, { type: 'binary' });
   }
 

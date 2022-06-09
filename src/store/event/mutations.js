@@ -3,7 +3,7 @@ import { ddl_event } from '@/common/local';
 
 export default {
   [type.ADDEVENT](state, payload) {
-    console.log('commit-addevent')
+    // console.log('commit-addevent')
     state.count++;
     payload.id = state.count;
     state.event.unshift(payload);
