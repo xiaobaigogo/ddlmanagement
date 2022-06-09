@@ -20,7 +20,7 @@
   import Output from "@/view/Output";
   import Input from "@/view/Input";
   import { useStore } from "vuex";
-  import { ref, onMounted, watch, nextTick } from "vue";
+  import { ref, onMounted, watch, nextTick, onUnmounted } from "vue";
 
   const currentTab = ref('Home');
   const store = useStore();
@@ -41,6 +41,7 @@
 
 
   let activeLink, active, activecoords;
+  let timer, intervalTimer;
   onMounted(() => {
     let activeBackground = document.createElement('span');
     activeBackground.setAttribute('class', 'highlignt');
@@ -111,8 +112,31 @@
       links[i].addEventListener('mouseenter', lightOn);
       links[i].addEventListener('mouseleave', lightOff);
     }
+
+    // 每到一个整点，更新一次ddl，把未完成的过期事件放入已过期
+    function updateDDL() {
+      const now = new Date();
+      let nextHour = new Date();
+      nextHour.setHours(now.getHours() + 1);
+      nextHour.setMinutes(0);
+      nextHour.setSeconds(0);
+      console.log(now, nextHour, nextHour - now);
+
+      timer = setTimeout(() => {
+        store.dispatch('eveexpired');
+        intervalTimer = setInterval(() => {
+          store.dispatch('eveexpired');
+        }, 1000 * 60 * 60)
+      }, nextHour - now);
+    }
+    updateDDL();
+
   })
 
+  onUnmounted(() => {
+    clearTimeout(timer);
+    clearInterval(intervalTimer);
+  })
 
   watch(currentTab, () => {
     nextTick(() => {

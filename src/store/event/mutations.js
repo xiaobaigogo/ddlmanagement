@@ -26,7 +26,7 @@ export default {
         break;
       }
     }
-    console.log(state);
+    // console.log(state);
     ddl_event.set(state);
   },
 
@@ -61,7 +61,8 @@ export default {
       const element = state.event[i];
       if (element.kind == 1) {
         const now = +new Date();
-        if (now > element.time) {
+        if (now > element.timestamp) {
+          console.log(element, '已过期');
           element.kind = 3;
         }
       }
