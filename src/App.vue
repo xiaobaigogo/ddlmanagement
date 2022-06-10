@@ -120,7 +120,7 @@
       nextHour.setHours(now.getHours() + 1);
       nextHour.setMinutes(0);
       nextHour.setSeconds(0);
-      console.log(now, nextHour, nextHour - now);
+      // console.log(now, nextHour, nextHour - now);
 
       timer = setTimeout(() => {
         store.dispatch('eveexpired');
@@ -129,8 +129,8 @@
         }, 1000 * 60 * 60)
       }, nextHour - now);
     }
+    store.dispatch('eveexpired');
     updateDDL();
-
   })
 
   onUnmounted(() => {
